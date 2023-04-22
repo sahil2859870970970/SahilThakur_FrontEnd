@@ -1,0 +1,141 @@
+Q1; Explain what the simple List component does.
+Ans1; List is used to store multiple items of the same and different datatype under a variable. It is basically an array. We can perform various operations on it such as .map() to loop over the list/array to list down all the elements.
+
+For instance, the List component makes sure to map over the array to render a list of ListItem components for each item as child component.
+
+For Example:
+const list = [
+  {
+    id: 'a',
+    firstname: 'Sahil',
+    lastname: 'Thakur',
+    year: 2002,
+  },
+  {
+    id: 'b',
+    firstname: 'Sukhlal',
+    lastname: 'Singh',
+    year: 2003,
+  },
+];
+
+const App = () => <List list={list} />;
+
+const List = ({ list }) => (
+  <ul>
+    {list.map(item => (
+      <ListItem key={item.id} item={item} />
+    ))}
+  </ul>
+);
+
+const ListItem = ({ item }) => (
+  <li>
+    <div>{item.id}</div>
+    <div>{item.firstname}</div>
+    <div>{item.lastname}</div>
+    <div>{item.year}</div>
+  </li>
+);
+
+const List = ({ list }) => (
+  <ul>
+    {(list || []).map(item => (
+      <ListItem key={item.id} item={item} />
+    ))}
+  </ul>
+);
+
+Q2;What problems / warnings are there with code?
+Ans2;First Problem:The default value of the items prop is set to null, which could cause unexpected behavior if the prop is not provided.
+                   Example:items : PropTypes.array(PropTypes.shapeOf({ ....... })),} ;.
+     Second Problem:The isSelected prop is not properly passed to the SingleListItem component - it should be passed as a boolean value based on whether the current index matches the selected index.
+
+     Third Problem:PropTypes.arrayOf has to be used and PropTypes.shape has to be used.
+
+Q3;Please fix, optimize, and/or modify the component as much as you think is necessary?
+Ans3;import React, { useState, useEffect, memo } from 'react';
+import PropTypes from 'prop-types';
+
+// Single List Item
+const WrappedSingleListItem = ({
+index,
+isSelected,
+onClickHandler,
+text,
+}) => {
+return (
+<li
+style={{ backgroundColor: isSelected ? 'green' : 'red'}}
+onClick={()=>onClickHandler(index)}
+>
+{text}
+
+);
+};
+
+WrappedSingleListItem.propTypes = {
+index: PropTypes.number,
+isSelected: PropTypes.bool,
+onClickHandler: PropTypes.func.isRequired,
+text: PropTypes.string.isRequired,
+};
+
+const SingleListItem = memo(WrappedSingleListItem);
+
+// List Component
+const WrappedListComponent = ({
+items,
+}) => {
+const [selectedIndex,setSelectedIndex] = useState(null);
+
+useEffect(() => {
+setSelectedIndex(null);
+}, [items]);
+
+const handleClick = index => {
+setSelectedIndex(index);
+};
+
+return (
+<ul style={{ textAlign: 'left' }}>
+{items.map((item, index) => (
+<SingleListItem
+key={index}
+index={index}
+isSelected={index === selectedIndex}
+onClickHandler={handleClick}
+text={item.text}
+/>
+))}
+
+)
+};
+
+WrappedListComponent.propTypes = {
+items: PropTypes.arrayOf(PropTypes.shape({
+text: PropTypes.string.isRequired,
+})),
+};
+
+WrappedListComponent.defaultProps = {
+items: [
+{
+text: 'item1',
+},
+{
+text: 'item2',
+},
+{
+text: 'item3',
+},
+{
+text: 'item4',
+},
+],
+};
+
+const List = memo(WrappedListComponent);
+
+export default List;
+                    Example:isSelected = {SelectedIndex}.
